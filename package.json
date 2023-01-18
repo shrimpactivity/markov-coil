@@ -1,0 +1,22 @@
+{
+  "name": "suggestion-machine",
+  "version": "1.0.0",
+  "description": "Spits out suggestions given a sequence of values.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shrampi/suggestion-machine.git"
+  },
+  "author": "Carson Crow",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/shrampi/suggestion-machine/issues"
+  },
+  "homepage": "https://github.com/shrampi/suggestion-machine#readme",
+  "devDependencies": {
+    "jest": "^29.3.1"
+  }
+}
