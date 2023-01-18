@@ -1,114 +1,97 @@
-const SuggestionMachine = require('..');
+const SuggestionMachine = require("..");
 
-describe('Suggestion tree generates', () => {
-    test('error for no tokens', () => {
-        expect(() => new SuggestionMachine([])).toThrow(RangeError);
-    });
+describe("Suggestion machine generates", () => {
 
-    test('correct tree from single token', () => {
-        const st = new SuggestionTree(['daisy']);
-        expect(st.data).toStrictEqual({ daisy: {} });
-    });
+  test("empty for undefined values", () => {
+    const s = new SuggestionMachine();
+    expect(s.values).toHaveLength(0);
+    expect(s.occurrences).toStrictEqual({});
+  });
 
-    test('correct tree from two tokens', () => {
-        const st = new SuggestionTree([true, false]);
-        expect(st.data).toStrictEqual(
-            {
-                true: {
-                    false: {}
-                },
-                false: {}
-            }
-        );
-    });
+  test("empty for empty values", () => {
+    const s = new SuggestionMachine([]);
+    expect(s.values).toHaveLength(0);
+    expect(s.occurrences).toStrictEqual({});
+  });
 
-    test('correct tree from longer sequence', () => {
-        const tokens = [0, 1, 2, 3, 4, 5];
-        const st = new SuggestionTree(tokens);
-        expect(st.data[0][1][2]).toStrictEqual({ 3: {} });
-        expect(st.data[2][3]).toStrictEqual({
-            4: {
-                5: {}
-            }
-        });
-        expect(st.data[5]).toStrictEqual({});
-    });
+  test("correctly from single value", () => {
+    const s = new SuggestionMachine(["daisy"]);
+    expect(s.values).toStrictEqual(["daisy"]);
+    expect(s.occurrences).toStrictEqual({'daisy': [0]});
+  });
 
-    test('correct tree from sequence of same tokens', () => {
-        const st = new SuggestionTree(['a', 'a', 'a', 'a', 'a']);
-        expect(st.data).toStrictEqual(
-            {
-                a: { a: { a: { a: {} } } },
-            }
-        );
-    });
+  test("correctly from two tokens", () => {
+    const s = new SuggestionMachine([true, false]);
+    expect(s.values).toStrictEqual([true, false]);
+    expect(s.occurrences).toStrictEqual({true: [0], false: [1]});
+  });
 
-    test('error for depth 0', () => {
-        expect(() => new SuggestionTree([1, 2, 3], 0)).toThrow(RangeError);
-    });
+  test("correctly from longer sequence", () => {
+    const tokens = [0, 1, 2, 1, 0, 2];
+    const s = new SuggestionMachine(tokens);
+    expect(s.values).toStrictEqual([0, 1, 2, 1, 0, 2]);
+    expect(s.occurrences).toStrictEqual({0: [0, 4], 1: [1, 3], 2: [2, 5]});
+  });
 
-    test('correct tree with depth 1', () => {
-        const st = new SuggestionTree([1, 2, 3], 1);
-        expect(st.data).toStrictEqual({
-            1: {},
-            2: {},
-            3: {}
-        });
-    });
+  test("correctly from sequence of same tokens", () => {
+    const tokens = 'a a a a a a'.split(' ');
+    const s = new SuggestionMachine(tokens);
+    expect(s.values).toStrictEqual('a a a a a a'.split(' '));
+    expect(s.occurrences).toStrictEqual({"a": [0, 1, 2, 3, 4, 5]});
+  });
 });
 
-describe('Suggestion tree suggests', () => {
+describe("Suggestion machine suggests", () => {
 
-    test('correctly for single token tree', () => {
-        const st = new SuggestionTree([1]);
-        const suggestion = st.getSuggestionFor([0, 1, 2]);
-        expect(suggestion).toEqual("1");
-    });
+  test("nothing for empty machine", () => {
+    const s = new SuggestionMachine();
+    const suggestion = s.suggestFor([0, 1, 2]);
+    expect(suggestion).toBeNull();
+  });
 
-    test('correctly for more complex tree', () => {
-        const tokens = 'this is an example of some more complex tokens and some more things to consider'.split(' ');
-        const st = new SuggestionTree(tokens);
-        expect(st.getSuggestionFor('this is an'.split(' '))).toBe('example');
-        expect(st.getSuggestionFor(['more'])).toMatch(/complex|things/);
-        expect(st.getSuggestionFor('some more'.split(' '))).toMatch(/complex|things/);
-        expect(st.getSuggestionFor(['this'])).toBe('is');
-    });
+  test("correctly for single value machine", () => {
+    const s = new SuggestionMachine([1]);
+    const suggestion = s.suggestFor([0, 1, 2]);
+    expect(suggestion).toEqual("1");
+  });
+
+  test("correctly for more complex machine", () => {
+    const tokens =
+      "this is an example of some more complex tokens and some more things to consider".split(
+        " "
+      );
+    const s = new SuggestionMachine(tokens);
+    expect(s.suggestFor("this is an".split(" "))).toBe("example");
+    expect(s.suggestFor(["more"])).toMatch(/complex|things/);
+    expect(s.suggestFor("some more".split(" "))).toMatch(
+      /complex|things/
+    );
+    expect(s.suggestFor(["this"])).toBe("is");
+  });
 });
 
-describe('Suggestion tree serializes', () => {
+describe("Suggestion tree serializes", () => {
+  test("to a string correctly", () => {
+    const s = new SuggestionMachine([1, 2, 3]);
+    const stringified = st.toJSONString();
+    expect(stringified).toBe('["1","2","3"]');
+  });
+   
 
-    test('to a string correctly', () => {
-        const st = new SuggestionTree([1, 2, 3]);
-        const stringified = st.toJSONString();
-        expect(stringified).toBe(
-            JSON.stringify({
-                1: {
-                    2: {
-                        3: {}
-                    }
-                },
-                2: {
-                    3: {}
-                },
-                3: {}
-            })
-        )
+  test("to a string and then back to a tree correctly", () => {
+    const st = new SuggestionTree([1, 2, 3]);
+    const stringified = st.toJSONString();
+    const stcopy = SuggestionTree.parseJSON(stringified);
+    expect(stcopy.data).toStrictEqual({
+      1: {
+        2: {
+          3: {},
+        },
+      },
+      2: {
+        3: {},
+      },
+      3: {},
     });
-
-    test('to a string and then back to a tree correctly', () => {
-        const st = new SuggestionTree([1, 2, 3]);
-        const stringified = st.toJSONString();
-        const stcopy = SuggestionTree.parseJSON(stringified);
-        expect(stcopy.data).toStrictEqual({
-            1: {
-                2: {
-                    3: {}
-                }
-            },
-            2: {
-                3: {}
-            },
-            3: {}
-        });
-    })
-})
+  });
+});

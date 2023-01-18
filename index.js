@@ -4,11 +4,11 @@
 class SuggestionMachine {
   /**
    * Create a suggestion machine.
-   * @param {*[]} seed An array of primitive values. 
+   * @param {*[]} seedValues An array of primitive values. 
    */
-  constructor(seed) {
-    this.values = seed ? seed : []; 
-    this.occurrences = this.#generateOccurrences(seed);
+  constructor(seedValues) {
+    this.values = seedValues ? seedValues : []; 
+    this.occurrences = this.#generateOccurrences(seedValues);
   }
   
   /**
@@ -19,7 +19,7 @@ class SuggestionMachine {
   #generateOccurrences(values) {
     const result = {};
     if (!values) return result;
-    for (let i = 0; i < this.values.length - 1; i += 1) {
+    for (let i = 0; i < this.values.length; i += 1) {
       const value = this.values[i];
       if (!result[value]) result[value] = [];
       result[value].push(i);
@@ -47,11 +47,14 @@ class SuggestionMachine {
   }
 
   /**
-   * Returns a random value from the seed values. 
+   * Returns a random value from the seed values, or null if none were provided.
    * @param {boolean} [weighted=false] If true, values that appear more frequently are more likely to be returned.   
    * @returns {*}
    */
   randomSuggestion(weighted=false) {
+    if (this.values.length === 0) {
+      return null;
+    }
     if (weighted) {
       return this.values[Math.floor(Math.random() * this.values.length)];
     }
@@ -90,7 +93,7 @@ class SuggestionMachine {
   }
 
   /**
-   * Returns a suggestion for the specified predecessors. 
+   * Returns a suggestion for the specified predecessors, or null if no seed values were provided.
    * @param {*[]} predecessors A sequence of values, must be same type as seed values. 
    * @param {boolean} [weighted=false] If true, the choice of suggestion will be weighted by frequency. 
    * @returns {*} The suggested value.
