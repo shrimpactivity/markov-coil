@@ -73,25 +73,15 @@ describe("Suggestion machine suggests", () => {
 describe("Suggestion tree serializes", () => {
   test("to a string correctly", () => {
     const s = new SuggestionMachine([1, 2, 3]);
-    const stringified = st.toJSONString();
-    expect(stringified).toBe('["1","2","3"]');
+    const stringified = s.toJSONString();
+    expect(stringified).toBe('[1,2,3]');
   });
    
 
-  test("to a string and then back to a tree correctly", () => {
-    const st = new SuggestionTree([1, 2, 3]);
-    const stringified = st.toJSONString();
-    const stcopy = SuggestionTree.parseJSON(stringified);
-    expect(stcopy.data).toStrictEqual({
-      1: {
-        2: {
-          3: {},
-        },
-      },
-      2: {
-        3: {},
-      },
-      3: {},
-    });
+  test("to a string and then back to an object correctly", () => {
+    const s = new SuggestionMachine([1, 2, 3]);
+    const stringified = s.toJSONString();
+    const copy = SuggestionMachine.parseJSON(stringified);
+    expect(copy.values).toStrictEqual([1, 2, 3]);
   });
 });
