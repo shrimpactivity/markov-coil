@@ -19,8 +19,8 @@ class SuggestionMachine {
   #generateOccurrences(values) {
     const result = {};
     if (!values) return result;
-    for (let i = 0; i < this.values.length; i += 1) {
-      const value = this.values[i];
+    for (let i = 0; i < values.length; i += 1) {
+      const value = values[i];
       if (!result[value]) result[value] = [];
       result[value].push(i);
     }
@@ -47,6 +47,31 @@ class SuggestionMachine {
   }
 
   /**
+   * Returns the indexes of any seed values that immediately succeed a search index with the given value.
+   * @param {number[]} indexesToSearch The indexes to search.
+   * @param {*} value The value to search for.
+   * @return {number[]} The indexes that contain the value. 
+   */
+  #findStrongAdjacentIndexes(indexesToSearch, value) {
+    const result = [];
+    for (let index of indexesToSearch) {
+      if (value === this.values[index] && index < this.values.length - 1) {
+        result.push(index + 1);
+      } 
+    }
+    return result;
+  }
+
+  /**
+   * Returns a new array with duplicate items removed. 
+   * @param {*[]} items 
+   * @return {number[]}
+   */
+  #removeDuplicates(items) {
+    return items.filter((index, arrIndex) => items.indexOf(index) === arrIndex);
+  }
+
+  /**
    * Returns a random value from the seed values, or null if none were provided.
    * @param {boolean} [weighted=false] If true, values that appear more frequently are more likely to be returned.   
    * @returns {*}
@@ -58,8 +83,8 @@ class SuggestionMachine {
     if (weighted) {
       return this.values[Math.floor(Math.random() * this.values.length)];
     }
-    const values = Object.keys(this.occurrences);
-    return values[Math.floor(Math.random() * values.length)];
+    const uniqueValues = this.#removeDuplicates(this.values);
+    return uniqueValues[Math.floor(Math.random() * uniqueValues.length)];
   }
 
   /**
@@ -70,26 +95,18 @@ class SuggestionMachine {
    */
   getAllSuggestionsFor(predecessors, allowDuplicateSuggestions=false) {
     let candidateIndexes = [];
+    
     for (let predecessor of predecessors) {
+      candidateIndexes = this.#findStrongAdjacentIndexes(candidateIndexes, predecessor);
       if (candidateIndexes.length === 0) {
         candidateIndexes = this.#getWeakAdjacentIndexes(predecessor);
       }
-      else {
-        const newCandidateIndexes = [];
-        for (let index of candidateIndexes) {
-          if (predecessor === this.values[index] && index < this.values.length - 1) {
-            newCandidateIndexes.push(index + 1);
-          } 
-        }
-        candidateIndexes = newCandidateIndexes;
-      }
     }
 
-    const candidates = candidateIndexes.map(i => this.values[i]);
-    if (allowDuplicateSuggestions) {
-      return candidates;
+    if (!allowDuplicateSuggestions) {
+      return this.#removeDuplicates(candidateIndexes).map(i => this.values[i]);
     }
-    return candidates.filter((candidate, arrIndex) => candidates.indexOf(candidate) === arrIndex);
+    return candidateIndexes.map(i => this.values[i]);
   }
 
   /**
@@ -99,11 +116,11 @@ class SuggestionMachine {
    * @returns {*} The suggested value.
    */
   suggestFor(predecessors, weighted=false) {
-    const candidates = this.getAllSuggestionsFor(predecessors, weighted);
-    if (candidates.length === 0) {
+    const possibleSuggestions = this.getAllSuggestionsFor(predecessors, weighted);
+    if (possibleSuggestions.length === 0) {
       return this.randomSuggestion(weighted);
     }
-    return candidates[Math.floor(Math.random() * candidates.length)];
+    return possibleSuggestions[Math.floor(Math.random() * possibleSuggestions.length)];
   }
 
   /**
