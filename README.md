@@ -25,6 +25,9 @@ machine.suggestFor(['the', 'greatest']);
 // Returns ['example', 'person']
 machine.getAllSuggestionsFor(['the', 'greatest']);
 
+// Returns ['ever', 'written', 'by', 'the']
+machine.suggestSequenceFor(['example', 'text'], 4);
+
 // Returns 'written'
 machine.suggestFor(['ever']);
 
