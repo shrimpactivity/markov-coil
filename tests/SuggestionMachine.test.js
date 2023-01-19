@@ -51,8 +51,18 @@ describe("Suggestion machine suggests", () => {
 
   test("correctly for single value machine", () => {
     const s = new SuggestionMachine([1]);
-    const suggestion = s.suggestFor([0, 1, 2]);
-    expect(suggestion).toEqual("1");
+    expect(s.suggestFor([0, 1, 2])).toBe(1);
+    expect(s.suggestFor([1])).toBe(1);
+  });
+
+  test("correctly for interrupted seed sequence", () => {
+    const s = new SuggestionMachine([1, 2, 3, 4, 5]);
+    const suggestion = s.suggestFor([2, 3, 4, 2]);
+    expect(suggestion).toBe(3);
+    const suggestion2 = s.suggestFor([2, 3, 4, 2]);
+    expect(suggestion2).toBe(3);
+    const suggestion3 = s.suggestFor([2, 3, 4, 2]);
+    expect(suggestion3).toBe(3);
   });
 
   test("correctly for more complex machine", () => {
