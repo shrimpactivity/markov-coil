@@ -74,6 +74,14 @@ describe("Suggestion machine suggests", () => {
     expect(s.suggestFor("some more".split(" "))).toMatch(/complex|things/);
     expect(s.suggestFor(["this"])).toBe("is");
   });
+
+  test("randomly for accuracy of 0", () => {
+    const tokens = [1,2,3,2,1,3,1,3,1,2];
+    const s = new SuggestionMachine(tokens);
+    for (let i = 0; i < 10; i += 1) {
+      expect(String(s.suggestFor([]))).toMatch(/1|2|3/);
+    }
+  })
 });
 
 describe("Suggestion machine suggests sequence", () => {
