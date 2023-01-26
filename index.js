@@ -147,9 +147,9 @@ class SuggestionMachine {
     const result = [];
     const depth = predecessors.length;
     for (let i = 0; i < length; i += 1) {
-      let predecessorsToConsider = predecessors
-        .concat(result)
-        .slice(-1 * depth);
+      let predecessorsToConsider = depth
+        ? predecessors.concat(result).slice(-1 * depth)
+        : [];
       result.push(this.suggestFor(predecessorsToConsider, weighted));
     }
     return result;
