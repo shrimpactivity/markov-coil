@@ -1,6 +1,6 @@
 {
   "name": "suggestion-machine",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Spits out suggestions given a sequence of values.",
   "main": "index.js",
   "scripts": {
