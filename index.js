@@ -136,18 +136,17 @@ class SuggestionMachine {
   }
 
   /**
-   * Suggests a sequence of new values for the given predecessors. Each new item in the sequence will consider
-   * the N previous items that precede it, where N is the length of the predecessors argument.
+   * Suggests a sequence of new values for the given predecessors. 
    * @param {*[]} predecessors A sequence of values, must be same type as seed values.
    * @param {number} length The length of the returned sequence.
-   * @param {*} [weighted=false] If true, the choice of suggestion will be weighted by frequency.
+   * @param {number} [depth=3] The number of predecessors to consider for each new suggestion in the sequence.
+   * @param {boolean} [weighted=false] If true, the choice of suggestion will be weighted by frequency.
    * @returns {*[]} The suggested sequence.
    */
-  suggestSequenceFor(predecessors, length, weighted = false) {
+  suggestSequenceFor(predecessors, length, depth = 3, weighted = false) {
     const result = [];
-    const depth = predecessors.length;
     for (let i = 0; i < length; i += 1) {
-      let predecessorsToConsider = depth
+      let predecessorsToConsider = depth > 0
         ? predecessors.concat(result).slice(-1 * depth)
         : [];
       result.push(this.suggestFor(predecessorsToConsider, weighted));

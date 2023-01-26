@@ -108,7 +108,7 @@ describe("Suggestion machine suggests sequence", () => {
   test("of all seed values correctly", () => {
     const s = new SuggestionMachine([1, 2, 3, 4, 5, 6, 7]);
     expect(s.suggestSequenceFor([1], 6)).toStrictEqual([2, 3, 4, 5, 6, 7]);
-  })
+  });
 });
 
 describe("Suggestion tree serializes", () => {
@@ -123,5 +123,7 @@ describe("Suggestion tree serializes", () => {
     const stringified = s.toJSONString();
     const copy = SuggestionMachine.parseJSON(stringified);
     expect(copy.values).toStrictEqual([1, 2, 3]);
+    expect(copy.suggestFor([2])).toBe(3);
+    expect(copy.suggestSequenceFor([1], 2, 1, true)).toStrictEqual([2, 3]);
   });
 });
