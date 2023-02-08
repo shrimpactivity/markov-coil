@@ -4,7 +4,7 @@
   "description": "Spits out suggestions given a sequence of values.",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest && node ./test/performance.js"
   },
   "repository": {
     "type": "git",

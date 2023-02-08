@@ -1,14 +1,16 @@
+const randomChoice = require('./util/randomChoice');
+
 /**
  * A class for providing suggestions based on a sequence of seed values.
  */
 class SuggestionMachine {
   /**
    * Create a suggestion machine.
-   * @param {*[]} seedValues An array of primitive values.
+   * @param {*[]} items An array of primitive values.
    */
-  constructor(seedValues) {
-    this.values = seedValues ? seedValues : [];
-    this.occurrences = this.#generateOccurrences(seedValues);
+  constructor(sequence) {
+    this.values = sequence;
+    this.weakAdjacencies = this.#generateWeakAdjacencies(sequence);
   }
 
   /**
@@ -16,104 +18,97 @@ class SuggestionMachine {
    * @param {*[]} values An array of primitive values.
    * @returns {Object}
    */
-  #generateOccurrences(values) {
+  #generateWeakAdjacencies(values) {
     const result = {};
-    if (!values) return result;
-    for (let i = 0; i < values.length; i += 1) {
+    for (let i = 0; i < values.length - 1; i += 1) {
       const value = values[i];
       if (!result[value]) result[value] = [];
-      result[value].push(i);
+      result[value].push(i + 1);
     }
     return result;
   }
 
   /**
-   * Returns all indexes where value occurs.
+   * Returns the indexes of values weakly adjacent to the given value.
    * @param {*} value
    * @returns {number[]}
    */
-  #getIndexes(value) {
-    const indexes = this.occurrences[value];
-    return indexes ? indexes : [];
+  #getWeaklyAdjacentIndexes(value) {
+    const adjacents = this.weakAdjacencies[value];
+    if (!adjacents) {
+      return [];
+    }
+    return adjacents;
   }
 
   /**
-   * Returns the indexes of all values that are successors of the given value.
-   * @param {*} value
-   * @returns {number[]}
-   */
-  #getWeakAdjacentIndexes(value) {
-    return this.#getIndexes(value)
-      .map((i) => i + 1)
-      .filter((i) => i < this.values.length);
-  }
-
-  /**
-   * Returns the indexes of any seed values that immediately succeed a search index with the given value.
-   * @param {number[]} indexesToSearch The indexes to search.
+   * Returns the strongly adjacent indexes of any search index that has the provided value.
    * @param {*} value The value to search for.
-   * @return {number[]} The indexes that contain the value.
+   * @param {number[]} indexesToSearch The indexes to search.
+   * @return {number[]} The adjacent indexes.
    */
-  #findStrongAdjacentIndexes(indexesToSearch, value) {
+  #getStronglyAdjacentIndexes(value, indexesToSearch) {
     const result = [];
     for (let index of indexesToSearch) {
-      if (value === this.values[index] && index < this.values.length - 1) {
+      if (this.values[index] === value && index < this.values.length - 1) {
         result.push(index + 1);
       }
     }
     return result;
   }
 
-  /**
-   * Returns a new array with duplicate items removed.
-   * @param {*[]} items
-   * @return {number[]}
-   */
-  #removeDuplicates(items) {
-    return items.filter((index, arrIndex) => items.indexOf(index) === arrIndex);
-  }
-
-  /**
-   * Returns a random value from the seed values, or null if none were provided.
-   * @param {boolean} [weighted=false] If true, values that appear more frequently are more likely to be returned.
-   * @returns {*}
-   */
-  randomSuggestion(weighted = false) {
-    if (this.values.length === 0) {
-      return null;
+  #getUniqueValues() {
+    const uniques = Object.keys(this.weakAdjacencies);
+    if (this.values.length > 0) {
+      uniques.push(this.values[this.values.length - 1]);
     }
-    if (weighted) {
-      return this.values[Math.floor(Math.random() * this.values.length)];
-    }
-    const uniqueValues = this.#removeDuplicates(this.values);
-    return uniqueValues[Math.floor(Math.random() * uniqueValues.length)];
+    return uniques;
   }
 
   /**
    * Returns an array of possible suggestions for the specified predecessors.
    * @param {*[]} predecessors A sequence of values, must be same type as seed values.
-   * @param {boolean} [allowDuplicateSuggestions=false] If true, duplicates of the same suggestion will appear in the result based on how many times they occur.
+   * @param {boolean} [allowDuplicates=false] If true, duplicates of the same suggestion will appear in the result.
    * @returns {*[]} An array of suggested values.
    */
-  getAllSuggestionsFor(predecessors, allowDuplicateSuggestions = false) {
+  getAllSuggestionsFor(predecessors, allowDuplicates = false) {
     let candidateIndexes = [];
 
     for (let predecessor of predecessors) {
-      candidateIndexes = this.#findStrongAdjacentIndexes(
-        candidateIndexes,
-        predecessor
+      candidateIndexes = this.#getStronglyAdjacentIndexes(
+        predecessor,
+        candidateIndexes
       );
       if (candidateIndexes.length === 0) {
-        candidateIndexes = this.#getWeakAdjacentIndexes(predecessor);
+        candidateIndexes = this.#getWeaklyAdjacentIndexes(predecessor);
       }
     }
 
-    if (!allowDuplicateSuggestions) {
-      return this.#removeDuplicates(candidateIndexes).map(
-        (i) => this.values[i]
-      );
+    const candidateValues = candidateIndexes.map((i) => this.values[i]);
+    if (!allowDuplicates) {
+      const uniqueValues = new Set(candidateValues);
+      return [...uniqueValues];
     }
-    return candidateIndexes.map((i) => this.values[i]);
+
+    return candidateValues;
+  }
+
+  /**
+   * Returns a random value from the seed values, or null if the seed values are empty.
+   * @param {boolean} [weighted=false] If true, the choice of suggestion will be weighted by its frequency in the provided values.
+   * @returns {*} A random value.
+   */
+  randomSuggestion(weighted = false) {
+    if (this.values.length === 0) {
+      return null;
+    }
+
+    if (weighted) {
+      return randomChoice(this.values);
+    }
+
+    const uniqueValues = this.#getUniqueValues();
+    return randomChoice(uniqueValues);
   }
 
   /**
@@ -130,13 +125,11 @@ class SuggestionMachine {
     if (possibleSuggestions.length === 0) {
       return this.randomSuggestion(weighted);
     }
-    return possibleSuggestions[
-      Math.floor(Math.random() * possibleSuggestions.length)
-    ];
+    return randomChoice(possibleSuggestions);
   }
 
   /**
-   * Suggests a sequence of new values for the given predecessors. 
+   * Suggests a sequence of new values for the given predecessors.
    * @param {*[]} predecessors A sequence of values, must be same type as seed values.
    * @param {number} length The length of the returned sequence.
    * @param {number} [depth=3] The number of predecessors to consider for each new suggestion in the sequence.
@@ -146,9 +139,8 @@ class SuggestionMachine {
   suggestSequenceFor(predecessors, length, depth = 3, weighted = false) {
     const result = [];
     for (let i = 0; i < length; i += 1) {
-      let predecessorsToConsider = depth > 0
-        ? predecessors.concat(result).slice(-1 * depth)
-        : [];
+      let predecessorsToConsider =
+        depth > 0 ? predecessors.concat(result).slice(-1 * depth) : [];
       result.push(this.suggestFor(predecessorsToConsider, weighted));
     }
     return result;

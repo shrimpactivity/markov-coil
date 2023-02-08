@@ -1,48 +1,43 @@
 const SuggestionMachine = require("..");
 
 describe("Suggestion machine generates", () => {
-  test("empty for undefined values", () => {
-    const s = new SuggestionMachine();
-    expect(s.values).toHaveLength(0);
-    expect(s.occurrences).toStrictEqual({});
-  });
 
   test("empty for empty values", () => {
     const s = new SuggestionMachine([]);
     expect(s.values).toHaveLength(0);
-    expect(s.occurrences).toStrictEqual({});
+    expect(s.weakAdjacencies).toStrictEqual({});
   });
 
   test("correctly from single value", () => {
     const s = new SuggestionMachine(["daisy"]);
     expect(s.values).toStrictEqual(["daisy"]);
-    expect(s.occurrences).toStrictEqual({ daisy: [0] });
+    expect(s.weakAdjacencies).toStrictEqual({});
   });
 
   test("correctly from two tokens", () => {
     const s = new SuggestionMachine([true, false]);
     expect(s.values).toStrictEqual([true, false]);
-    expect(s.occurrences).toStrictEqual({ true: [0], false: [1] });
+    expect(s.weakAdjacencies).toStrictEqual({ true: [1] });
   });
 
   test("correctly from longer sequence", () => {
     const tokens = [0, 1, 2, 1, 0, 2];
     const s = new SuggestionMachine(tokens);
     expect(s.values).toStrictEqual([0, 1, 2, 1, 0, 2]);
-    expect(s.occurrences).toStrictEqual({ 0: [0, 4], 1: [1, 3], 2: [2, 5] });
+    expect(s.weakAdjacencies).toStrictEqual({ 0: [1, 5], 1: [2, 4], 2: [3] });
   });
 
   test("correctly from sequence of same tokens", () => {
     const tokens = "a a a a a a".split(" ");
     const s = new SuggestionMachine(tokens);
     expect(s.values).toStrictEqual("a a a a a a".split(" "));
-    expect(s.occurrences).toStrictEqual({ a: [0, 1, 2, 3, 4, 5] });
+    expect(s.weakAdjacencies).toStrictEqual({ a: [1, 2, 3, 4, 5] });
   });
 });
 
 describe("Suggestion machine suggests", () => {
-  test("nothing for empty machine", () => {
-    const s = new SuggestionMachine();
+  test("null for empty machine", () => {
+    const s = new SuggestionMachine([]);
     const suggestion = s.suggestFor([0, 1, 2]);
     expect(suggestion).toBeNull();
   });
@@ -86,7 +81,7 @@ describe("Suggestion machine suggests", () => {
 
 describe("Suggestion machine suggests sequence", () => {
   test("of nulls for empty machine", () => {
-    const s = new SuggestionMachine();
+    const s = new SuggestionMachine([]);
     const suggestions = s.suggestSequenceFor([0, 1, 2], 20);
     expect(suggestions[0]).toBeNull();
     expect(suggestions).toHaveLength(20);
