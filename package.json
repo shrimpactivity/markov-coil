@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shrampi/suggestion-machine.git"
+    "url": "git+https://github.com/shrimpactivity/suggestion-machine.git"
   },
   "author": "Carson Crow",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/shrampi/suggestion-machine/issues"
+    "url": "https://github.com/shrimpactivity/suggestion-machine/issues"
   },
-  "homepage": "https://github.com/shrampi/suggestion-machine#readme",
+  "homepage": "https://github.com/shrimpactivity/suggestion-machine#readme",
   "devDependencies": {
     "jest": "^29.3.1"
   }
