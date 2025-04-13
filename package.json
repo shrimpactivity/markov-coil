@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/shrimpactivity/markovinator#readme",
   "devDependencies": {
-    "jest": "^29.3.1"
+    "jest": "^29.3.1",
+    "typescript": "^5.8.3"
   }
 }
