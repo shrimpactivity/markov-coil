@@ -1,21 +1,21 @@
 {
-  "name": "suggestion-machine",
+  "name": "markovinator",
   "version": "1.1.0",
-  "description": "Spits out suggestions given a sequence of values.",
+  "description": "Generate text suggestions from a seed text.",
   "main": "index.js",
   "scripts": {
     "test": "jest && node ./test/performance.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shrimpactivity/suggestion-machine.git"
+    "url": "git+https://github.com/shrimpactivity/markovinator.git"
   },
   "author": "Carson Crow",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/shrimpactivity/suggestion-machine/issues"
+    "url": "https://github.com/shrimpactivity/markovinator/issues"
   },
-  "homepage": "https://github.com/shrimpactivity/suggestion-machine#readme",
+  "homepage": "https://github.com/shrimpactivity/markovinator#readme",
   "devDependencies": {
     "jest": "^29.3.1"
   }

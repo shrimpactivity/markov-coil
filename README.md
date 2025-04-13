@@ -1,13 +1,15 @@
-# suggestion-machine
-Spits out suggestions from a sequence of values.
+# Markovinator
+Markov chain based text suggestion generator.
 
 ## Installation
 
 ```bash
-npm install suggestion-machine
+npm install markovinator
 ```
 
 ## Usage
+
+TODO: update readme
 
 ```javascript
 import SuggestionMachine from 'suggestion-machine';
