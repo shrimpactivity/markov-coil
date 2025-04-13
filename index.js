@@ -1,4 +1,4 @@
-const randomChoice = require('./util/randomChoice');
+const randomChoice = require('./src/util/randomChoice');
 
 /**
  * A class for providing suggestions based on a sequence of seed values.

@@ -1,10 +1,10 @@
-# Markovinator
-Markov chain based text suggestion generator.
+# Markov Coil
+An efficient Markov Chain text generator.
 
 ## Installation
 
 ```bash
-npm install markovinator
+npm install markov-coil
 ```
 
 ## Usage
