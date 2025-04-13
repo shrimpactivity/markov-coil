@@ -4,7 +4,8 @@
   "description": "Generate text suggestions from a seed text.",
   "main": "index.js",
   "scripts": {
-    "test": "jest && node ./test/performance.js"
+    "start": "tsc --build && node dist/index.js",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -17,7 +18,11 @@
   },
   "homepage": "https://github.com/shrimpactivity/markov-coil#readme",
   "devDependencies": {
-    "jest": "^29.3.1",
+    "@babel/preset-env": "^7.26.9",
+    "@babel/preset-typescript": "^7.27.0",
+    "@types/jest": "^29.5.14",
+    "babel-jest": "^29.7.0",
+    "ts-jest": "^29.3.2",
     "typescript": "^5.8.3"
   }
 }
