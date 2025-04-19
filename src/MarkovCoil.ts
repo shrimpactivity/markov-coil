@@ -1,56 +1,64 @@
 
-interface MarkovCoilOptions {
+interface MarkovOptions {
   depth?: number;
-  excludeSpecialChars?: boolean;
+  includeSpecialChars?: boolean;
 }
 
-class MarkovCoil {
-  idToToken: string[] = [];
-  tokenToId: Map<string, number> = new Map();
-  chain = {};
-  options;
+interface MarkovVocab {
+  idToToken: string[];
+  tokenToId: Map<string, number>;
+}
+
+const defaultOptions: Required<MarkovOptions> = {
+  depth: 3,
+  includeSpecialChars: false,
+}
+
+export default class MarkovCoil {
+  private options: Required<MarkovOptions>;
+  vocab: MarkovVocab = {
+    idToToken: [],
+    tokenToId: new Map<string, number>(),
+  };
+  chain = new Map<string, number>();
+  
 
   /**
    * Create new text suggestion Markovinator from seed text.
    * @param {string} corpus The text seed.
-   * @param {number=} depth The chain depth. Default is three.
    * @param {MarkovCoilOptions=} options Options for text suggestion.
-   * @param options.excludeSpecialChars Excludes non-alphanumeric characters not typical in English text.
+   * @param options.includeSpecialChars Excludes non-alphanumeric characters not typical in English text.
    */
-  constructor (corpus: string, options?: MarkovCoilOptions) {
-    this.options = options || {};
-    this.options.depth = this.options.depth || 3;
-    this.generateChain(corpus);
-    /*
-    - Tokenize text
-    - Add tokens to dictionary, and then to chain
-    */
+  constructor (corpus: string, options?: MarkovOptions) {
+    this.options = { ...defaultOptions, ...options }
+    this.generate(corpus);
   }
 
   tokenize(text: string) {
-    const trimmedOfWhitespace = text.replace(/\s+/g, ' ').trim();
-    return trimmedOfWhitespace.split(' ');
+    const trimmed = text.replace(/\s+/g, ' ').trim().toLowerCase();
+    return trimmed.split(' ');
   }
 
   addTokenToVocab(token: string) {
-    const id = this.tokenToId.get(token);
+    const id = this.vocab.tokenToId.get(token);
     if (id === undefined) {
-      this.idToToken.push(token);
-      this.tokenToId.set(token, this.idToToken.length - 1);
+      this.vocab.idToToken.push(token);
+      this.vocab.tokenToId.set(token, this.vocab.idToToken.length - 1);
     }
   }
 
-  generateChain(corpus: string) {
+  generate(corpus: string) {
     const tokens = this.tokenize(corpus)
-    tokens.forEach(token => {
+    tokens.forEach((token, index) => {
       this.addTokenToVocab(token)
-
+      const context = tokens.slice(index - this.options.depth + 1, index);
     })
   }
 
-  
-  suggest(context: string[], weighted: boolean = true) {
-
+  nextFor(context: string|string[], weighted: boolean = true) {
+    if (typeof context === "string") {
+      context = this.tokenize(context);
+    }
   }
 
   

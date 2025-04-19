@@ -1,5 +1,5 @@
 # Markov Coil
-An efficient Markov Chain text generator.
+An efficient Markov-Chain based text suggestor. Optimized for large bodies of text with optional chain depth parameter. 
 
 ## Installation
 
