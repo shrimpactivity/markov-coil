@@ -27,18 +27,13 @@ export default class MarkovCoil {
 
   /**
    * Create new text suggestion Markovinator from seed text.
-   * @param {string|string[]} corpus Accepts either a string (which will use default tokenizer with options), or a custom token list.
+   * @param {string[]} corpus List of string tokens to generate chain with.
    * @param {MarkovCoilOptions=} options Options for text suggestion.
    * @param options.includeSpecialChars Excludes non-alphanumeric characters not typical in English text.
    */
-  constructor(corpus: string | string[], options?: MarkovOptions) {
+  constructor(corpus: string[], options?: MarkovOptions) {
     this.options = { ...defaultOptions, ...options };
     this.generate(corpus);
-  }
-
-  tokenize(text: string) {
-    const trimmed = text.replace(/\s+/g, " ").trim().toLowerCase();
-    return trimmed.split(" ");
   }
 
   addTokenToVocab(token: string) {
@@ -71,14 +66,7 @@ export default class MarkovCoil {
     }
   }
 
-  generate(corpus: string | string[]) {
-    let tokens: string[];
-    if (typeof corpus === "string") {
-      tokens = this.tokenize(corpus);
-    } else {
-      tokens = corpus;
-    }
-
+  generate(tokens: string[]) {
     tokens.forEach(token => {
       this.addTokenToVocab(token);
     })
@@ -90,10 +78,7 @@ export default class MarkovCoil {
     }
   }
 
-  nextFor(context: string | string[], weighted: boolean = true) {
-    if (typeof context === "string") {
-      context = this.tokenize(context);
-    }
+  nextFor(context: string[], weighted: boolean = true) {
     if (context.length === 0) {
       return sample(this.vocab.tokens);
     }
