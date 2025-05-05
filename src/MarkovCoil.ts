@@ -1,5 +1,31 @@
 import { sample } from "./util/random";
 
+/**
+ * NOTES:
+ * Since you're encoding a chain of depth 0 1 ... n all at once,
+ * it makes more sense to include lesser chain depths as subsets of the deepest one,
+ * rather than creating a new branch for each chain?
+ * 
+ * the quick brown fox
+ * 
+ * the-quick -> brown: 1
+ * quick-brown -> fox: 1
+ * the -> quick: 1
+ * quick -> brown: 1
+ * brown -> fox: 1 
+ * "" -> the: 1, quick: 1, brown: 1, fox: 1
+ * 
+ * vs. 
+ * 
+ * the -> 1
+ *     -> quick -> 1
+ *              -> brown -> 1
+ *                       -> fox -> 1
+ * 
+ *              -> 
+ * 
+ */
+
 interface MarkovOptions {
   depth?: number;
   includeSpecialChars?: boolean;
@@ -10,6 +36,7 @@ interface MarkovVocab {
   tokenIndex: Map<string, number>;
 }
 
+// Map indexed state key (eg. "0-1-2") to next token index and weight (eg. 3 => 1)
 type MarkovChain = Map<string, Map<number, number>>;
 
 const defaultOptions: Required<MarkovOptions> = {
@@ -45,6 +72,7 @@ export default class MarkovCoil {
   }
 
   getStateKey(tokens: string[]) {
+    if (!tokens.length) return "";
     return tokens
       .map((token) => this.vocab.tokenIndex.get(token))
       .join("-");

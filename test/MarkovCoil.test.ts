@@ -18,12 +18,26 @@ describe("Markov Coil", () => {
    *
    */
 
-  describe.only("markov chain", () => {
-    it("generates correctly for depth=1", () => {
+  describe("markov chain", () => {
+    it("generates correctly for depth=0", () => {
+      const mc = new MarkovCoil(tokenize("the the the dog"), {depth: 0});
+      const expectedChain = new Map([
+        ["", new Map([
+          [0, 2],
+          [0, 1]
+        ])],
+      ])
+    })
+
+    it.only("generates correctly for depth=1", () => {
       const mc = new MarkovCoil("the the the dog".split(" "), { depth: 1 });
       const expectedChain = new Map([
-        ["0", new Map([["0", 2]])],
-        ["0", new Map([["1", 1]])],
+        ["0", new Map([[0, 2]])],
+        ["0", new Map([[1, 1]])],
+        ["", new Map([
+          [0, 2],
+          [0, 1]
+        ])]
       ]);
       expect(mc.chain).toEqual(expectedChain);
     });
@@ -43,15 +57,15 @@ describe("Markov Coil", () => {
   });
 
   describe("text suggestion", () => {
-    const mc = new MarkovCoil("The quick brown fox and the quick Brown Dog");
+    const mc = new MarkovCoil(tokenize("The quick brown fox and the quick Brown Dog"));
 
     it("generates correct suggestions with depth=1", () => {
-      expect(mc.nextFor("the")).toBe("quick");
+      expect(mc.nextFor(["the"])).toBe("quick");
       expect(mc.nextFor(["the", "dog", "and"])).toBe("the");
     });
 
     it("generates correct suggestion for depth=2", () => {
-      expect(mc.nextFor("the quick")).toBe("brown");
+      expect(mc.nextFor(["the quick"])).toBe("brown");
       expect(mc.nextFor(["quick", "and"])).toBe("the");
       expect(mc.nextFor(["the"])).toBe("");
     });
