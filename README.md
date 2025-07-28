@@ -1,5 +1,5 @@
 # Markov Coil
-An efficient Markov-Chain based text suggestor. Optimized for large bodies of text with optional chain depth parameter. 
+Markov Chain implementation in TypeScript, optimized for large bodies of text.
 
 ## Installation
 

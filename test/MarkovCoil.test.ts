@@ -3,12 +3,13 @@ import { tokenize } from "../src/tokenize";
 
 describe("Markov Coil", () => {
   describe("token vocabulary", () => {
-    it("generates correctly", () => {
+    it.only("generates correctly", () => {
       const mc = new MarkovCoil(tokenize("The quick brown fox and the quick Brown Dog"));
       const { tokenIndex, tokens } = mc.vocab;
       expect(tokenIndex.size).toBe(6);
       expect(tokenIndex.get("the")).toBe(0);
       expect(tokenIndex.get("and")).toBe(4);
+      expect(tokens).toEqual(["the", "quick", "brown", "fox", "and", "dog"])
     });
   });
 

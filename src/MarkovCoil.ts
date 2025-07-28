@@ -1,28 +1,24 @@
 import { sample } from "./util/random";
 
-/**
- * NOTES:
- * Since you're encoding a chain of depth 0 1 ... n all at once,
- * it makes more sense to include lesser chain depths as subsets of the deepest one,
- * rather than creating a new branch for each chain?
+/** 
+ * Implementation:
+ * depth 0 = 'no chain', every context spits out random word from corpus
+ * depth 1 = single link, provides one token to follow last token of context
+ * depth n = n links, provides one token to follow last n tokens of context
  * 
- * the quick brown fox
+ * markov = new Markov(corpus, depth)
+ * next = markov.nextFor(tokens, optionalDepth)
+ * nextSeries = markov.nextSeriesFor(tokens, length) 
  * 
- * the-quick -> brown: 1
- * quick-brown -> fox: 1
- * the -> quick: 1
- * quick -> brown: 1
- * brown -> fox: 1 
- * "" -> the: 1, quick: 1, brown: 1, fox: 1
- * 
- * vs. 
- * 
- * the -> 1
- *     -> quick -> 1
- *              -> brown -> 1
- *                       -> fox -> 1
- * 
- *              -> 
+ * Chain:
+ *  {
+ *  index1: [index2, weight]
+ *  index1-index2: [index3, weight]
+ *  index1-index2-index3: [index4, weight]
+ *  }
+ * Vocab:
+ *  index -> token: [token1, token2, token3]
+ *  token -> index: { token1: index1 }
  * 
  */
 
@@ -55,7 +51,7 @@ export default class MarkovCoil {
   /**
    * Create new text suggestion Markovinator from seed text.
    * @param {string[]} corpus List of string tokens to generate chain with.
-   * @param {MarkovCoilOptions=} options Options for text suggestion.
+   * @param {MarkovCoilOptions} options Options for text suggestion.
    * @param options.includeSpecialChars Excludes non-alphanumeric characters not typical in English text.
    */
   constructor(corpus: string[], options?: MarkovOptions) {
@@ -106,9 +102,13 @@ export default class MarkovCoil {
     }
   }
 
-  nextFor(context: string[], weighted: boolean = true) {
+  nextFor(context: string|string[], weighted: boolean = true) {
     if (context.length === 0) {
       return sample(this.vocab.tokens);
     }
+  }
+
+  nextSeriesFor(context: string|string[]) {
+
   }
 }
