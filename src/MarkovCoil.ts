@@ -46,7 +46,7 @@ export default class MarkovCoil {
     sequence.forEach(token => {
       current.weight += 1; 
       const index = this.getIndex(token)!;
-      if (current.children.get(index) === undefined) {
+      if (current.children.has(index) === false) {
         current.children.set(index, new MarkovNode());
       }
       current = current.children.get(index)!;
@@ -65,6 +65,27 @@ export default class MarkovCoil {
     }
   }
 
+  nextMostLikely(sequence: string[]) {
+    const indexes = sequence.slice(-1 * this.depth).map(token => this.getIndex(token));
+    let current = this.root;
+    indexes.forEach(index => {
+      if (index === undefined) {
+        current = this.root;
+        return;
+      }
+
+      if(current.children.has(index)) {
+        
+      }
+    })
+  }
+
+  next(sequence: string[], weighted=true) {
+
+  }
+
+
+  /** Prints tabulated trie structure to console. */
   prettyPrint() {
     console.log(`Root (${this.root.weight})`);
     const prettyPrintHelper = (node: MarkovNode, spaces=2) => {

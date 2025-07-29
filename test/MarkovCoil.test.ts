@@ -5,20 +5,12 @@ describe("Markov Coil", () => {
   describe("token vocabulary", () => {
     test("generates indexes correctly", () => {
       const markov = new MarkovCoil(tokenize("The quick brown fox and the quick Brown Dog"));
-      const { tokenIndexesAndWeights, tokens } = markov.vocab;
-      expect(tokenIndexesAndWeights.size).toBe(6);
-      expect(tokenIndexesAndWeights.get("the")![0]).toBe(0);
-      expect(tokenIndexesAndWeights.get("and")![0]).toBe(4);
+      const { indexes, tokens } = markov.vocab;
+      expect(indexes.size).toBe(6);
+      expect(indexes.get("the")).toBe(0);
+      expect(indexes.get("and")).toBe(4);
       expect(tokens).toEqual(["the", "quick", "brown", "fox", "and", "dog"])
     });
-
-    test("generates weights correctly", () => {
-      const markov = new MarkovCoil(tokenize("The quick brown fox and the quick Brown Dog"));
-      const { tokenIndexesAndWeights, tokens } = markov.vocab;
-      expect(tokenIndexesAndWeights.get("the")![1]).toBe(2);
-      expect(tokenIndexesAndWeights.get("and")![1]).toBe(1);
-      expect(tokens).toEqual(["the", "quick", "brown", "fox", "and", "dog"])
-    })
   });
 
   /**
