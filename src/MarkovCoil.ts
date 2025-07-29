@@ -20,12 +20,10 @@ import { sample } from "./util/random";
  *  index -> token: [token1, token2, token3]
  *  token -> index: { token1: [ index, weight ] }
  * 
+ * 
+ * 
  */
 
-interface MarkovOptions {
-  depth?: number;
-  includeSpecialChars?: boolean;
-}
 
 interface MarkovVocab {
   tokens: string[];
@@ -35,13 +33,8 @@ interface MarkovVocab {
 // Map indexed state key (eg. "0-1-2") to next token index and weight (eg. 3 => 1)
 type MarkovChain = Map<string, Map<number, number>>;
 
-const defaultOptions: Required<MarkovOptions> = {
-  depth: 3,
-  includeSpecialChars: false,
-};
-
 export default class MarkovCoil {
-  options: Required<MarkovOptions>;
+  depth: number;
   vocab: MarkovVocab = {
     tokens: [],
     tokenIndexesAndWeights: new Map<string, number[]>(),
@@ -51,18 +44,18 @@ export default class MarkovCoil {
   /**
    * Create new text suggestion Markovinator from seed text.
    * @param {string[]} corpus List of string tokens to generate chain with.
-   * @param {MarkovCoilOptions} options Options for text suggestion.
+   * @param {number} depth Options for text suggestion.
    * @param options.includeSpecialChars Excludes non-alphanumeric characters not typical in English text.
    */
-  constructor(corpus: string[], options?: MarkovOptions) {
-    this.options = { ...defaultOptions, ...options };
+  constructor(corpus: string[], depth=3) {
+    this.depth = depth
     this.generate(corpus);
   }
 
   getTokenIndex(token: string) {
     const indexAndWeight = this.vocab.tokenIndexesAndWeights.get(token)
     if (indexAndWeight) {
-      return indexAndWeight[1]
+      return indexAndWeight[0]
     }
     return undefined
   }
@@ -113,7 +106,7 @@ export default class MarkovCoil {
     if (!(this.chain.has(stateKey))) {
       this.chain.set(stateKey, new Map<number, number>([[nextIndex, 0]]));
     }
-    
+
     this.incrementWeightFor(stateKey, nextIndex)
     this.addToChain(prevState);
   }
@@ -124,7 +117,7 @@ export default class MarkovCoil {
     })
 
     for (let i = 0; i < tokens.length; i += 1) {
-      const state = tokens.slice(i, i + this.options.depth + 1);
+      const state = tokens.slice(i, i + this.depth + 1);
       this.addToChain(state)
     }
   }

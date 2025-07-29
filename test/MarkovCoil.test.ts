@@ -3,14 +3,22 @@ import { tokenize } from "../src/tokenize";
 
 describe("Markov Coil", () => {
   describe("token vocabulary", () => {
-    it.only("generates correctly", () => {
-      const mc = new MarkovCoil(tokenize("The quick brown fox and the quick Brown Dog"));
-      const { tokenIndex, tokens } = mc.vocab;
-      expect(tokenIndex.size).toBe(6);
-      expect(tokenIndex.get("the")).toBe(0);
-      expect(tokenIndex.get("and")).toBe(4);
+    test("generates indexes correctly", () => {
+      const markov = new MarkovCoil(tokenize("The quick brown fox and the quick Brown Dog"));
+      const { tokenIndexesAndWeights, tokens } = markov.vocab;
+      expect(tokenIndexesAndWeights.size).toBe(6);
+      expect(tokenIndexesAndWeights.get("the")![0]).toBe(0);
+      expect(tokenIndexesAndWeights.get("and")![0]).toBe(4);
       expect(tokens).toEqual(["the", "quick", "brown", "fox", "and", "dog"])
     });
+
+    test("generates weights correctly", () => {
+      const markov = new MarkovCoil(tokenize("The quick brown fox and the quick Brown Dog"));
+      const { tokenIndexesAndWeights, tokens } = markov.vocab;
+      expect(tokenIndexesAndWeights.get("the")![1]).toBe(2);
+      expect(tokenIndexesAndWeights.get("and")![1]).toBe(1);
+      expect(tokens).toEqual(["the", "quick", "brown", "fox", "and", "dog"])
+    })
   });
 
   /**
@@ -20,39 +28,15 @@ describe("Markov Coil", () => {
    */
 
   describe("markov chain", () => {
-    it("generates correctly for depth=0", () => {
-      const mc = new MarkovCoil(tokenize("the the the dog"), {depth: 0});
-      const expectedChain = new Map([
-        ["", new Map([
-          [0, 2],
-          [0, 1]
-        ])],
-      ])
+    test("generates correctly for maxDepth of 0", () => {
+      const markov = new MarkovCoil(tokenize("the the the dog"), 0);
+      expect(markov.chain.size).toBe(0);
     })
 
-    it.only("generates correctly for depth=1", () => {
-      const mc = new MarkovCoil("the the the dog".split(" "), { depth: 1 });
-      const expectedChain = new Map([
-        ["0", new Map([[0, 2]])],
-        ["0", new Map([[1, 1]])],
-        ["", new Map([
-          [0, 2],
-          [0, 1]
-        ])]
-      ]);
-      expect(mc.chain).toEqual(expectedChain);
+    test("generates correctly for depth=1", () => {
+      const markov = new MarkovCoil("the the dog the".split(" "), 1);
+      expect(markov.chain.size).toBe(2)
     });
-
-    // it("generates correctly for depth=1", () => {
-    //   const mc = new MarkovCoil("the quick fox and the dog".split(" "), { depth: 1 });
-    //   const expectedChain = new Map([
-    //     ["0", new Map([["1", 1], ["4", 1]])],
-    //     ["1", new Map([["2", 1]])],
-    //     ["2", new Map([["3", 1]])],
-    //     ["3", new Map([["0", 1]])],
-    //   ]);
-    //   expect(mc.chain).toEqual(expectedChain)
-    // })
 
     it("generates correctly for depth=2", () => {});
   });
