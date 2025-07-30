@@ -1,11 +1,14 @@
-import MarkovNode from "./MarkovNode";
+class MarkovNode {
+  children = new Map<number, MarkovNode>();
+  weight = 0;
+}
 
 interface MarkovVocab {
   tokens: string[];
   indexes: Map<string, number>;
 }
 
-export default class MarkovCoil {
+export class MarkovCoil {
   depth: number;
   vocab: MarkovVocab = {
     tokens: [],

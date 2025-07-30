@@ -1,4 +1,4 @@
-import MarkovCoil from "../src/MarkovCoil";
+import { MarkovCoil } from "../src/MarkovCoil";
 import { tokenize } from "../src/tokenize";
 
 describe("Markov Coil", () => {
