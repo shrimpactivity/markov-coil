@@ -1,5 +1,4 @@
 import MarkovNode from "./MarkovNode";
-//import { sample } from "./util/random";
 
 interface MarkovVocab {
   tokens: string[];
@@ -15,25 +14,24 @@ export default class MarkovCoil {
   root: MarkovNode = new MarkovNode();
 
   /**
-   * Create new text suggestion Markovinator from seed text.
-   * @param {string[]} corpus List of string tokens to generate chain with.
-   * @param {number} depth Options for text suggestion.
-   * @param options.includeSpecialChars Excludes non-alphanumeric characters not typical in English text.
+   * Create new markov chain to predict tokens.
+   * @param {string[]} corpus Tokens to generate chain with.
+   * @param {number} [depth=3] Depth of the chain. A depth of n will use n tokens in its search for a prediction.
    */
   constructor(corpus: string[], depth=3) {
     this.depth = depth
-    this.generate(corpus);
+    this.createChain(corpus);
   }
 
-  getIndex(token: string) {
+  private getIndex(token: string) {
     return this.vocab.indexes.get(token)
   }
 
-  getToken(index: number) {
+  private getToken(index: number) {
     return this.vocab.tokens[index];
   }
 
-  addTokenToVocab(token: string) {
+  private addTokenToVocab(token: string) {
     const index = this.getIndex(token);
     if (index === undefined) {
       this.vocab.tokens.push(token);
@@ -41,7 +39,7 @@ export default class MarkovCoil {
     }
   }
 
-  addSequenceToChain(sequence: string[]) {
+  private addSequenceToChain(sequence: string[]) {
     let current = this.root;
     sequence.forEach(token => {
       current.weight += 1; 
@@ -54,7 +52,7 @@ export default class MarkovCoil {
     current.weight += 1;
   }
 
-  generate(tokens: string[]) {
+  private createChain(tokens: string[]) {
     tokens.forEach(token => {
       this.addTokenToVocab(token);
     })
@@ -65,24 +63,76 @@ export default class MarkovCoil {
     }
   }
 
-  nextMostLikely(sequence: string[]) {
-    const indexes = sequence.slice(-1 * this.depth).map(token => this.getIndex(token));
+  /**
+   * Predict next possible values for the given sequence of tokens.
+   * @param {string[]} context An array of tokens.
+   * @returns A mapping of possible tokens to their probability of occuring.
+   */
+  predictions(context: string[]): Record<string, number> {
+    const indexes = context.slice(-1 * this.depth).map(token => this.getIndex(token));
     let current = this.root;
+
     indexes.forEach(index => {
-      if (index === undefined) {
+      if (index === undefined || current.children.has(index) === false) {
         current = this.root;
         return;
       }
-
-      if(current.children.has(index)) {
-        
-      }
+      current = current.children.get(index)!
     })
+
+    const result: Record<string, number> = {};
+    current.children.forEach((node, index) => {
+      result[this.getToken(index)] = node.weight / current.weight;
+    })
+    return result;
   }
 
-  next(sequence: string[], weighted=true) {
 
+  weightedChoice(predictions: Record<string, number>): string | null {
+    const tokens = Object.keys(predictions);
+    if (tokens.length === 0) return null;
+
+    // Accumulate weights
+    const weights = tokens.map(token => predictions[token]);
+    for (let i = 1; i < weights.length; i += 1) {
+      weights[i] += weights[i - 1];
+    }
+
+    const random = Math.random() * weights[weights.length - 1];
+    // Could probably optimize this better with binary search, since weights are now ordered
+    for (let i = 0; i < tokens.length; i += 1) {
+      if (weights[i] > random) {
+        return tokens[i];
+      }
+    }
+
+    // Fallback (should not reach)
+    return null;
   }
+
+  predict(sequence: string[], weighted=true): string | null {
+    const predictions = this.predictions(sequence);
+    const tokens = Object.keys(predictions);
+    if (tokens.length === 0) return null;
+    if (!weighted) return tokens[Math.floor(Math.random() * tokens.length)];
+    
+    return this.weightedChoice(predictions);
+  }
+
+  predictSequence(sequence: string[], length: number, weighted=true): string[] {
+    if (length === 0) {
+      return [];
+    }
+    const prediction = this.predict(sequence, weighted);
+    if (prediction === null) {
+      return this.predictSequence([], length - 1, weighted);
+    }
+    const nextSequence = sequence.slice(1).concat(prediction);
+    return [prediction].concat(this.predictSequence(nextSequence, length - 1, weighted));
+  }
+
+
+  serialize() {}
 
 
   /** Prints tabulated trie structure to console. */
