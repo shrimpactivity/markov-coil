@@ -1,5 +1,5 @@
 import { MarkovCoil } from "../src/MarkovCoil";
-import { tokenize } from "../src/tokenize";
+import { tokenize } from "./utils/tokenize";
 
 describe("Markov Coil", () => {
   describe("token vocabulary", () => {
