@@ -13,38 +13,46 @@ describe("Markov Coil", () => {
     });
   });
 
-  /**
-   * Depth 0, the key is the word and the value is the weight
-   * Depth 1, "the" => ("quick" => 1)
-   *
-   */
-
   describe("markov chain", () => {
-    test("generates correctly for maxDepth of 0", () => {
+    test("generates correctly", () => {
       const markov = new MarkovCoil(tokenize("the the the dog"), 0);
-      expect(markov.chain.size).toBe(0);
+      expect(markov.root.children.size).toBe(2);
+      expect(markov.root.children.get(0)!.children.size).toBe(0);
+    })
+  })
+
+  describe("predictions", () => {
+    describe("map to weights is correct", () => {
+      test("for depth=0", () => {
+        const markov = new MarkovCoil(tokenize("the the the dog"), 0);
+        expect(markov.predictions([""])).toEqual({ "the": 0.75, "dog": 0.25 })
+      })
+  
+      test("for depth=1", () => {
+        const markov = new MarkovCoil("the dog the the the fox".split(" "), 1);
+        expect(markov.predictions(["the"])).toEqual({ "the": 0.5, "dog": 0.25, "fox": 0.25 })
+      });
+  
+      test("for depth=2", () => {
+        const markov = new MarkovCoil("the dog and the dog friend".split(" "), 2);
+        expect(markov.predictions(["the", "dog"])).toEqual({ "and": 0.5, "friend": 0.5 })
+      });
+    });
+
+    describe("for single token", () => {
+      test("are correct", () => {
+        const markov = new MarkovCoil("the quick brown fox and the lazy dog".split(" "));
+        expect(markov.predict(["brown"])).toEqual("fox");
+        expect(markov.predict("quick brown fox and".split(" "))).toEqual("the");
+      })
     })
 
-    test("generates correctly for depth=1", () => {
-      const markov = new MarkovCoil("the the dog the".split(" "), 1);
-      expect(markov.chain.size).toBe(2)
-    });
-
-    it("generates correctly for depth=2", () => {});
-  });
-
-  describe("text suggestion", () => {
-    const mc = new MarkovCoil(tokenize("The quick brown fox and the quick Brown Dog"));
-
-    it("generates correct suggestions with depth=1", () => {
-      expect(mc.nextFor(["the"])).toBe("quick");
-      expect(mc.nextFor(["the", "dog", "and"])).toBe("the");
-    });
-
-    it("generates correct suggestion for depth=2", () => {
-      expect(mc.nextFor(["the quick"])).toBe("brown");
-      expect(mc.nextFor(["quick", "and"])).toBe("the");
-      expect(mc.nextFor(["the"])).toBe("");
-    });
+    describe("for sequence", () => {
+      test("are correct", () => {
+        const markov = new MarkovCoil("the quick brown fox and the lazy dog".split(" "));
+        expect(markov.predictSequence(["quick"], 1)).toEqual(["brown"]);
+        expect(markov.predictSequence(["the", "quick"], 5)).toEqual("brown fox and the lazy".split(" "))
+      })
+    })
   });
 });
