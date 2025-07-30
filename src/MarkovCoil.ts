@@ -19,13 +19,13 @@ export class MarkovCoil {
   root: MarkovNode = new MarkovNode();
 
   /**
-   * Create new markov chain to predict tokens.
-   * @param {string[]} corpus Tokens to generate chain with.
-   * @param {number} [depth=3] Depth of the chain. A depth of n will use n tokens in its search for a prediction.
+   * Create new markov chain for token prediction.
+   * @param {string[]} tokens Tokens to generate chain with.
+   * @param {number} [depth=3] Depth of the chain. A depth of n will use n tokens in its search for a prediction (n-gram).
    */
-  constructor(corpus: string[], depth=3) {
+  constructor(tokens: string[], depth=3) {
     this.depth = depth
-    this.createChain(corpus);
+    this.createChain(tokens);
   }
 
   private getIndex(token: string) {
@@ -93,7 +93,7 @@ export class MarkovCoil {
   }
 
 
-  weightedChoice(predictions: Record<string, number>): string | null {
+  private weightedChoice(predictions: Record<string, number>): string | null {
     const tokens = Object.keys(predictions);
     if (tokens.length === 0) return null;
 
@@ -114,7 +114,13 @@ export class MarkovCoil {
     // Fallback (should not reach)
     return null;
   }
-
+  
+  /**
+   * Predict the next token given a starting sequence.
+   * @param {string[]} sequence The starting sequence of tokens.
+   * @param {boolean} [weighted=true] If true, will use weighted random choice from all possible predictions. If false, will use random choice. 
+   * @returns {string} The predicted token.
+   */
   predict(sequence: string[], weighted=true): string | null {
     const predictions = this.predictions(sequence);
     const tokens = Object.keys(predictions);
@@ -124,6 +130,13 @@ export class MarkovCoil {
     return this.weightedChoice(predictions);
   }
 
+  /**
+   * Predicts a sequence of tokens that could follow the starting sequence.
+   * @param {token[]} sequence The starting sequence of tokens.
+   * @param {number} length The length of the predicted sequence.
+   * @param {boolean} [weighted=true] If true, will use weighted random choice from all possible predictions. If false, will use random choice. 
+   * @returns {string[]} A sequence of predicted tokens.
+   */
   predictSequence(sequence: string[], length: number, weighted=true): string[] {
     if (length === 0) {
       return [];
@@ -136,7 +149,6 @@ export class MarkovCoil {
     return [prediction].concat(this.predictSequence(nextSequence, length - 1, weighted));
   }
 
-
   serialize() {
     return encode(this);
   }
@@ -146,7 +158,7 @@ export class MarkovCoil {
   }
 
 
-  /** Prints tabulated trie structure to console. */
+  /** Prints tabulated trie structure to console. Useful for debugging. */
   prettyPrint() {
     console.log(`Root (${this.root.weight})`);
     const prettyPrintHelper = (node: MarkovNode, spaces=2) => {
@@ -160,14 +172,4 @@ export class MarkovCoil {
     }
     prettyPrintHelper(this.root);
   }
-
-  // nextFor(context: string|string[], weighted: boolean = true) {
-  //   if (context.length === 0) {
-  //     return sample(this.vocab.tokens);
-  //   }
-  // }
-
-  // nextSeriesFor(context: string|string[]) {
-
-  // }
 }
