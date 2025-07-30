@@ -1,4 +1,4 @@
-import { tokenize } from "../src/tokenize";
+import { tokenize } from "./utils/tokenize";
 
 describe("tokenize", () => {
   it("works with simple text", () => {
