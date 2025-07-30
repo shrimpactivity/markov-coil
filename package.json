@@ -2,9 +2,18 @@
   "name": "markov-coil",
   "version": "1.0.0",
   "description": "Markov chain optimized for large bodies of text.",
+  "keywords": [
+    "markov-chain",
+    "markov",
+    "chain",
+    "text",
+    "suggestion",
+    "prediction"
+  ],
   "main": "index.js",
   "scripts": {
     "start": "tsc --build && node dist/index.js",
+    "build": "tsc --build",
     "test": "jest",
     "lint": "eslint .",
     "format": "prettier . --write",

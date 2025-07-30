@@ -1,6 +1,6 @@
 const SuggestionMachine = require("../index");
 
-console.log('')
+console.log("");
 
 const timer = () => {
   return {
