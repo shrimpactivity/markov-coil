@@ -1,5 +1,13 @@
 # Markov Coil
-Markov Chain implementation in TypeScript, optimized for large bodies of text.
+Markov chain implementation in TypeScript, optimized for providing text prediction
+from large bodies of text.
+
+## Features
+- Token-based trie and vocabulary indexing for fast queries and small memory footprint
+- Set depth of chain for required length of token n-gram
+- Predict tokens or token sequences with or without weighted choice
+- Find probabilities for all possible next tokens
+- Binary serialization courtesy of [MessagePack](https://github.com/msgpack/msgpack-javascript)
 
 ## Installation
 
@@ -9,40 +17,47 @@ npm install markov-coil
 
 ## Usage
 
-TODO: update readme
-
+### Initialize
 ```javascript
-import SuggestionMachine from 'suggestion-machine';
+import { MarkovCoil } from 'markov-coil';
+ 
+const tokens = 'the quick brown fox jumps over the lazy dog'.split(' ');
+const markov = new MarkovCoil(tokens);
+```
 
-// Start with an array to serve as the seed values. 
-// In the below example we split a string into an array of words. 
-const tokens = 'the greatest example text ever written by the greatest person.'.split(' ');
+### Prediction
 
-// Create a new tree
-const machine = new SuggestionMachine(tokens);
+#### Single Tokens
+```javascript
+markov.predict(['the', 'quick', 'brown']); // => 'fox'
+markov.predict(['the']); // => weighted random choice between 'quick' or 'lazy' (equal in this case)
+markov.predict(['token_not_found']) // => weighted random choice between all tokens
 
-// Returns either 'example' or 'person', randomly
-machine.suggestFor(['the', 'greatest']);
+// With 'weighted' flag set to false, all predictions for sequence are equally likely
+markov.predict(['the'], false) // => 'quick' or 'lazy', with equal probability of being chosen
+```
 
-// Returns ['example', 'person']
-machine.getAllSuggestionsFor(['the', 'greatest']);
+#### Sequences
+```javascript
+markov.predictSequence(['the', 'quick', 'brown'], 3); // => ['fox', 'jumps', 'over']
+```
 
-// Returns ['ever', 'written', 'by', 'the']
-machine.suggestSequenceFor(['example', 'text'], 4);
+#### Probability Mapping
+```javascript
+markov.predictions(['the']) // => { 'quick': 0.5, 'lazy': 0.5 }
+```
 
-// Returns 'written'
-machine.suggestFor(['ever']);
+### Serialization
+```javascript
+const data = markov.serialize()
+fs.writeFileSync(path, data)
 
-// Serialize as JSON string
-const stringified = machine.toJSONString();
-
-// De-serialize
-const deStringified = SuggestionMachine.parseJSON(stringified);
+const decodedMarkov = markov.deserialize(data);
 ```
 
 ## Contributing
 
-Pull requests are welcome. For major changes, please open an issue first
+Pull requests are welcome. For major changes, open an issue first
 to discuss what you would like to change.
 
 Please make sure to update tests as appropriate.
