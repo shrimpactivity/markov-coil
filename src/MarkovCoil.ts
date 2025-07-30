@@ -1,3 +1,5 @@
+import { encode, decode } from "@msgpack/msgpack"
+
 class MarkovNode {
   children = new Map<number, MarkovNode>();
   weight = 0;
@@ -135,7 +137,13 @@ export class MarkovCoil {
   }
 
 
-  serialize() {}
+  serialize() {
+    return encode(this);
+  }
+
+  deserialize(encodedData: ArrayBufferLike | ArrayLike<number> | ArrayBufferView<ArrayBufferLike>): MarkovCoil {
+    return decode(encodedData) as MarkovCoil;
+  }
 
 
   /** Prints tabulated trie structure to console. */
