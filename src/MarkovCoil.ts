@@ -1,4 +1,4 @@
-import { encode, decode } from "@msgpack/msgpack";
+import { encode } from "@msgpack/msgpack";
 
 class MarkovNode {
   children = new Map<number, MarkovNode>();
@@ -158,15 +158,6 @@ export class MarkovCoil {
 
   serialize() {
     return encode(this);
-  }
-
-  deserialize(
-    encodedData:
-      | ArrayBufferLike
-      | ArrayLike<number>
-      | ArrayBufferView<ArrayBufferLike>,
-  ): MarkovCoil {
-    return decode(encodedData) as MarkovCoil;
   }
 
   /** Prints tabulated trie structure to console. Useful for debugging. */
