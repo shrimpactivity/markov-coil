@@ -59,7 +59,9 @@ markov.predictions(["the"]); // => { 'quick': 0.5, 'lazy': 0.5 }
 const data = markov.serialize();
 fs.writeFileSync(path, data);
 
-const decodedMarkov = markov.deserialize(data);
+import { deserialize } from "markov-coil";
+
+const decodedMarkov = deserialize(data);
 ```
 
 ## Contributing
