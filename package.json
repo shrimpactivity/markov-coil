@@ -1,6 +1,6 @@
 {
   "name": "markov-coil",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Markov chain optimized for large bodies of text.",
   "keywords": [
     "markov-chain",
