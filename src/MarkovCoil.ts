@@ -1,6 +1,4 @@
-import { encode } from "@msgpack/msgpack";
-
-class MarkovNode {
+export class MarkovNode {
   children = new Map<number, MarkovNode>();
   weight = 0;
 }
@@ -156,17 +154,17 @@ export class MarkovCoil {
     );
   }
 
-  serialize() {
-    return encode(this);
-  }
-
   /** Prints tabulated trie structure to console. Useful for debugging. */
-  prettyPrint() {
+  prettyPrint(useVocab=false) {
     console.log(`Root (${this.root.weight})`);
     const prettyPrintHelper = (node: MarkovNode, spaces = 2) => {
       node.children.forEach((child, index) => {
         let line = " ".repeat(spaces);
-        line += this.getToken(index);
+        if (useVocab) {
+          line += this.getToken(index);
+        } else {
+          line += index
+        }
         line += ` (${child.weight})`;
         console.log(line);
         prettyPrintHelper(child, spaces + 2);

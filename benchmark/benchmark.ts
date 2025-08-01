@@ -1,8 +1,12 @@
-import { MarkovCoil } from "../src/index";
+import { MarkovCoil, serialize } from "../src/index";
 import { readFileSync, writeFileSync, statSync } from "fs";
 
 const file = readFileSync("./benchmark/shakespeare.txt", "utf-8");
-const tokens = file.replace(/\s+/g, " ").trim().toLowerCase().split(" ");
+const tokens = file.replace(/[-.?!]+/g, " ")
+  .replace(/[^A-Za-z\s]+/g, "")
+  .replace(/[\s]+/g, " ")
+  .toLowerCase()
+  .trim().split(" ");
 
 const benchmarkSizes = [1000, 10000, 100000, 1000000];
 benchmarkSizes.forEach((size) => {
@@ -10,7 +14,7 @@ benchmarkSizes.forEach((size) => {
   const startTime = Date.now();
   const markov = new MarkovCoil(benchmarkTokens);
   const endTime = Date.now();
-  writeFileSync("./benchmark/data", markov.serialize());
+  writeFileSync("./benchmark/data", serialize(markov));
   const fileStats = statSync("./benchmark/data");
 
   const result = {

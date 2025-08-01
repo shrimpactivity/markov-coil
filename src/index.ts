@@ -1,2 +1,2 @@
 export { MarkovCoil } from "./MarkovCoil";
-export { deserialize } from "./deserialize"
+export { serialize, deserialize } from "./serialization"

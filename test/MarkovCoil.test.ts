@@ -1,5 +1,10 @@
 import { MarkovCoil } from "../src/MarkovCoil";
-import { tokenize } from "./utils/tokenize";
+import { serialize, deserialize } from "../src/serialization";
+
+const tokenize = (text: string) => {
+  const trimmed = text.replace(/\s+/g, " ").trim().toLowerCase();
+  return trimmed.split(" ");
+}
 
 describe("Markov Coil", () => {
   describe("token vocabulary", () => {
@@ -73,4 +78,28 @@ describe("Markov Coil", () => {
       });
     });
   });
+
+  describe("serialization", () => {
+    test("works correctly", () => {
+      const markov = new MarkovCoil(
+        tokenize("The quick brown fox and the quick Brown Dog"),
+      );
+
+      const json = serialize(markov);
+      const decoded = deserialize(json);
+      const {tokens, indexes} = decoded.vocab;
+
+      expect(indexes.size).toBe(6);
+      expect(indexes.get("the")).toBe(0);
+      expect(indexes.get("and")).toBe(4);
+      expect(tokens).toEqual(["the", "quick", "brown", "fox", "and", "dog"]);
+
+      expect(decoded.predict(["and", "the"])).toBe("quick");
+      expect(decoded.predict(["fox", "and"])).toBe("the");
+      expect(decoded.predictSequence("the quick brown fox".split(" "), 2)).toEqual(["and", "the"])
+
+      const markov2 = deserialize(serialize(new MarkovCoil(tokenize("the the the dog"), 0)));
+      expect(markov2.predictions([""])).toEqual({ the: 0.75, dog: 0.25 });
+    })
+  })
 });
