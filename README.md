@@ -8,8 +8,8 @@ from large bodies of text.
 - Token-based trie and vocabulary indexing for fast queries and small memory footprint
 - Set depth of chain for required length of token n-gram
 - Predict tokens or token sequences with or without weighted choice
-- Find probabilities for all possible next tokens
-- Binary serialization courtesy of [MessagePack](https://github.com/msgpack/msgpack-javascript)
+- Get probabilities for all possible predictions
+- Compressed JSON serialization
 
 ## Installation
 
@@ -56,11 +56,9 @@ markov.predictions(["the"]); // => { 'quick': 0.5, 'lazy': 0.5 }
 ### Serialization
 
 ```javascript
-const data = markov.serialize();
-fs.writeFileSync(path, data);
+import { serialize, deserialize } from "markov-coil";
 
-import { deserialize } from "markov-coil";
-
+const jsonString = serialize(markov);
 const decodedMarkov = deserialize(data);
 ```
 
